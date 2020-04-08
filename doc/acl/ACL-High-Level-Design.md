@@ -64,7 +64,7 @@
   * [6 Testing](#6-testing)
     * [6.1 Testing environment](#61-testing-environment)
     * [6.2 List of tests to cover basic functionality](#62-list-of-tests-to-cover-basic-functionality)
-    * [6.3 Additional tests for Pase 2/3](#63-additional-tests-for-pase-23)
+    * [6.3 Additional tests for Phase 2/3](#63-additional-tests-for-pase-23)
   * [Appendix A:Keywords for matches and actions](#appendix-akeywords-for-matches-and-actions)
   * [Appendix B: Sample input json file](#appendix-b-sample-input-json-file)
   * [Appendix C: Code sample](#appendix-c-code-sample)
@@ -97,7 +97,7 @@ This document describes the high level design of the ACL feature.
 |--------------------------|--------------------------------------------|
 | ACL                      | Access Control List                        |
 | API                      | Application Programmable Interface         |
-| SAI                      | Swich Abstraction Interface                |
+| SAI                      | Switch Abstraction Interface                |
 | ERSPAN                   | Encapsulated Remote Switched Port Analysis |
 | JSON                     | JavaScript Object Notation                 |
 
@@ -111,9 +111,9 @@ Reads prepared json-files with ACL configuration and injects it into App DB.
 ### 1.2.2 App DB
 Located in the Redis DB instance #0 running inside the container "database". Redis DB works with the data in format of key-value tuples, needs no predefined schema and can hold various types of data.
 ### 1.2.3 Orchestration Agent
-This component is running in the "orchagent" docker container and is resdponsible for processing updates of the App DB and do corresponding changes in the SAI DB via SAI Redis.
+This component is running in the "orchagent" docker container and is responsible for processing updates of the App DB and do corresponding changes in the SAI DB via SAI Redis.
 ### 1.2.4 SAI Redis
-SAI Redis is an implementation of the SAI API which translates API calls into SAI objects which are stored in the SAI DB. Already hadles ACL data.
+SAI Redis is an implementation of the SAI API which translates API calls into SAI objects which are stored in the SAI DB. Already handles ACL data.
 ### 1.2.5 SAI DB
 Redis DB instance #1. Holds serialized SAI objects.
 ### 1.2.6 syncd 
@@ -126,7 +126,7 @@ An unified API which represent the switch state as a set of objects. In SONiC re
 
 - Support data plane ACL in SONiC (M)
 - Support ACL table which contains a set of ACL rules (M)
-ACL table has predefined type, each type defines the a set of match fields and actions available for the table. For example, mirror acl table only supports mirror as an action. (M)
+ACL table has predefined type, each type defines a set of match fields and actions available for the table. For example, mirror acl table only supports mirror as an action. (M)
 - Support binding ACL table to ports, initially only support for front panel physical port binding (M)
 - Support binding multiple ACL tables to ports. The use case is to have data plane ACL table which do permit/deny while have mirror ACL table do packet mirror for a same packet. Initial, there will be no conflicting actions between two ACL tables bound to the same set of ports. (M)
 - Support matching ip src/dst, ip protocol, tcp/udp port in ACL rules (M)
@@ -145,7 +145,7 @@ Requirement| Implementation Phase |Comment
 -----------|----------------------|-------
 Support data plane ACL in SONiC (M) | Phase 1
 Support ACL table which contains a set of ACL rules (M) | Phase 1
-ACL table has predefined type, each type defines the a set of match fields and actions available for the table. For example, mirror acl table only supports mirror as an action. (M) | Phase 1
+ACL table has predefined type, each type defines a set of match fields and actions available for the table. For example, mirror acl table only supports mirror as an action. (M) | Phase 1
 Support binding ACL table to ports, initially only support for front panel physical port binding (M) | Phase 3 | Phase 1 ?
 Support binding multiple ACL tables to ports. The use case is to have data plane ACL table which do permit/deny while have mirror ACL table do packet mirror for a same packet. Initial, there will be no conflicting actions between two ACL tables bound to the same set of ports. (M) | Phase 3
 Support matching ip src/dst, ip protocol, tcp/udp port in ACL rules (M) | Phase 1
@@ -183,7 +183,7 @@ No update is needed to support ACL.
                                                ; seq is the order of the rules
                                                ; when the packet is filtered by the
                                                ; ACL "policy_name".
-                                               ; A rule is always assocaited with a
+                                               ; A rule is always associated with a
                                                ; policy.
 
     ;field        = value
@@ -302,11 +302,11 @@ MIRROR_ACTION | string | Mirror session name
 
 ### 3.1.3 Orchestration Agent
 Orchestration Agent needs to be updated in order to support ACL in the AppDB and the SAI ACL API. There will be class AclOrch and a set of data structures implemented to handle ACL feature.
-Tables or rules create, delete and update Orchestration Agent will process basing on App DB changes. Some object updates updates will be handled and some will be considered as invalid.
+Tables or rules create, delete and update Orchestration Agent will process basing on App DB changes. Some object updates will be handled and some will be considered as invalid.
 See Chapter 5 for the details.
 
 #### 3.1.3.1 Class AclOrch
-Class AclOrch will hold a set of methods matching generic Orch class pattern to hanle App DB updates. The class will be initialized with the list of ACL tables to subscribe to the appropriate App DB updates. doTask() method will be called on tables update and will distribute handling DB update between the other handlers basing on a table which was updated.  
+Class AclOrch will hold a set of methods matching generic Orch class pattern to handle App DB updates. The class will be initialized with the list of ACL tables to subscribe to the appropriate App DB updates. doTask() method will be called on tables update and will distribute handling DB update between the other handlers basing on a table which was updated.  
 Below is the skeleton of the AclOrch class:
 ```cpp
     struct AclRule {
@@ -343,7 +343,7 @@ AclOrch class will inherit and reuse Orch class functionality which exploits pro
 Validation: on create validate table type.
 #### 3.1.3.3 Acl Rule Create or Delete
 ACL Rules are stores under ACL_RULE_TABLE:* keys in App DB. On ACL_RULE_TABLE update in the App DB AclOrch::doAclRuleTask() will be called to process the change. On table create AclOrch will verify if the rule already exists (using rule_id) creating of the rule which already exists will be processed as update. Regular create or delete will update the internal class structures and appropriate SAI objects will be created or deleted.  
-Validation: make sure the table exists, the list of match criterias is valid and fits the table, the list of actions is valid.
+Validation: make sure the table exists, the list of match criteria is valid and fits the table, the list of actions is valid.
 ### 3.1.4 SAI Redis
 No updates in Phase 1.
 ### 3.1.5 SAI DB
@@ -451,7 +451,7 @@ If LAG port not created yet when bind ACL table to it, LAG port will be added to
 #### 3.3.1.3 ACL and LAG
 
 - LAG member port shall not be added to the ACL Tables, or will be considered as invalid configuration and return fail.
-- LAG ACL configurations will be automatically applied to all the LAG members, this is done by SAI/SDK.
+- LAG ACL configurations will be automatically applied to all the LAG members; this is done by SAI/SDK.
 
 #### 3.3.1.3 ACL mirroring
 ```c++
@@ -541,7 +541,7 @@ If LAG port not created yet when bind ACL table to it, LAG port will be added to
 	    AclTable(): type(ACL_TABLE_UNKNOWN) {}
 	};
 ```
-To support mirror action bind to both ingress and egress ACL rule,  an member "acl_stage_type_t m_tableStage" added
+To support mirror action bind to both ingress and egress ACL rule, a member "acl_stage_type_t m_tableStage" added
 to class AclRuleMirror to indicate the stage the ACL mirror rule, according to the stage can select proper mirror
 action, "SAI_ACL_ENTRY_ATTR_ACTION_MIRROR_INGRESS" for ingress ACL rule, "SAI_ACL_ENTRY_ATTR_ACTION_MIRROR_EGRESS"
 for egress ACL rule.  
@@ -564,7 +564,7 @@ Depending on the number of changed properties in the updated ACL object, update 
 - Valid json file. The file should be in the format swssconfig can process. This assumes lists surrounded by square brackets, dictionaries with curly brackets (braces), tuples inside dictionary separated with semicolon and enumerated elements separated with the comma.
 - Logical consistency. The configuration provided should be complete. Rules should not refer non-existing tables, etc.
 - Order: Tables should appear before Rules.
-- The list of keywords to be used to address different match criterias and actions provided in Appendix A
+- The list of keywords to be used to address different match criteria and actions provided in Appendix A
 - Rules should have at least one match criteria and one action
 - List of ports to bind to the table should contain physical port names.
 - Maximum number of rules allowed: 1000 rules total in the all "L3" tables and 256 rules total in all "Mirror" tables.  
